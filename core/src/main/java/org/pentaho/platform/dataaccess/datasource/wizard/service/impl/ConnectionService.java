@@ -414,6 +414,7 @@ public class ConnectionService {
     IDatabaseConnectionList databaseConnections = new DefaultDatabaseConnectionList();
     List<IDatabaseConnection> conns = connectionService.getConnections();
     for ( IDatabaseConnection conn : conns ) {
+      sanitizer.unsanitizeConnectionParameters( conn );
       hidePassword( conn );
     }
     databaseConnections.setDatabaseConnections( conns );
@@ -435,6 +436,7 @@ public class ConnectionService {
   @Facet( name = "Unsupported" )
   public IDatabaseConnection getConnectionByName( @QueryParam( "name" ) String name ) throws ConnectionServiceException {
     IDatabaseConnection conn = connectionService.getConnectionByName( name );
+    sanitizer.unsanitizeConnectionParameters( conn );
     hidePassword( conn );
     return conn;
   }
@@ -480,6 +482,7 @@ public class ConnectionService {
     Response response;
     try {
       conn = connectionService.getConnectionByName( name );
+      sanitizer.unsanitizeConnectionParameters( conn );
       hidePassword( conn );
       response = Response.ok().entity( conn ).build();
     } catch ( Exception ex ) {

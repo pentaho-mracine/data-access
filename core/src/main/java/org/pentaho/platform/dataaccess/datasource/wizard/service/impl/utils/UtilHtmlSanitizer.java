@@ -18,14 +18,14 @@
 package org.pentaho.platform.dataaccess.datasource.wizard.service.impl.utils;
 
 import org.apache.commons.lang.StringEscapeUtils;
-import org.pentaho.database.model.DatabaseConnection;
+import org.pentaho.database.model.IDatabaseConnection;
 
 /**
  * Created by Yury_Bakhmutski on 8/11/2016.
  */
 public class UtilHtmlSanitizer {
 
-  public void sanitizeConnectionParameters( DatabaseConnection connection ) {
+  public void sanitizeConnectionParameters( IDatabaseConnection connection ) {
     String safeName = StringEscapeUtils.escapeHtml( connection.getName() );
     connection.setName( safeName );
 
@@ -42,6 +42,26 @@ public class UtilHtmlSanitizer {
     connection.setPassword( safePassword );
 
     String safeUsername = StringEscapeUtils.escapeHtml( connection.getUsername() );
+    connection.setUsername( safeUsername );
+  }
+
+  public void unsanitizeConnectionParameters( IDatabaseConnection connection ) {
+    String safeName = StringEscapeUtils.unescapeHtml( connection.getName() );
+    connection.setName( safeName );
+
+    String safeDbName = StringEscapeUtils.unescapeHtml( connection.getDatabaseName() );
+    connection.setDatabaseName( safeDbName );
+
+    String safeDbPort = StringEscapeUtils.unescapeHtml( connection.getDatabasePort() );
+    connection.setDatabasePort( safeDbPort );
+
+    String safeHostname = StringEscapeUtils.unescapeHtml( connection.getHostname() );
+    connection.setHostname( safeHostname );
+
+    String safePassword = StringEscapeUtils.unescapeHtml( connection.getPassword() );
+    connection.setPassword( safePassword );
+
+    String safeUsername = StringEscapeUtils.unescapeHtml( connection.getUsername() );
     connection.setUsername( safeUsername );
   }
 
