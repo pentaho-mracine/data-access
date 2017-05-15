@@ -68,6 +68,7 @@ import org.pentaho.platform.dataaccess.datasource.wizard.service.agile.AgileHelp
 import org.pentaho.platform.dataaccess.datasource.wizard.service.agile.CsvTransformGenerator;
 import org.pentaho.platform.dataaccess.datasource.wizard.service.gwt.IDSWDatasourceService;
 import org.pentaho.platform.dataaccess.datasource.wizard.service.impl.utils.DatasourceServiceHelper;
+import org.pentaho.platform.dataaccess.datasource.wizard.service.impl.utils.UtilHtmlSanitizer;
 import org.pentaho.platform.dataaccess.datasource.wizard.service.messages.Messages;
 import org.pentaho.platform.dataaccess.datasource.wizard.sources.query.QueryDatasourceSummary;
 import org.pentaho.platform.engine.core.system.PentahoSessionHolder;
@@ -123,6 +124,8 @@ public class DSWDatasourceServiceImpl implements IDSWDatasourceService {
   private GeoContext geoContext;
 
   private ConnectionServiceImpl connService;
+
+  private UtilHtmlSanitizer sanitizer = new UtilHtmlSanitizer();
 
   public DSWDatasourceServiceImpl() {
     this( new ConnectionServiceImpl() );
@@ -267,7 +270,7 @@ public class DSWDatasourceServiceImpl implements IDSWDatasourceService {
 
       int limit = ( previewLimit != null && previewLimit.length() > 0 ) ? Integer.parseInt( previewLimit ) : -1;
       sqlConnection = (SQLConnection) PentahoConnectionFactory.getConnection( IPentahoConnection.SQL_DATASOURCE,
-        connectionName, PentahoSessionHolder.getSession(),
+        sanitizer.safeEscapeHtml( connectionName ), PentahoSessionHolder.getSession(),
         new SimpleLogger( DatasourceServiceHelper.class.getName() ) );
       sqlConnection.setMaxRows( limit );
       sqlConnection.setReadOnly( true );
@@ -590,16 +593,16 @@ public class DSWDatasourceServiceImpl implements IDSWDatasourceService {
       executeQuery( datasourceDTO.getConnectionName(), query, "1" );
       Boolean securityEnabled = ( getPermittedRoleList() != null && getPermittedRoleList().size() > 0 )
         || ( getPermittedUserList() != null && getPermittedUserList().size() > 0 );
-      SerializedResultSet resultSet = DatasourceServiceHelper.getSerializeableResultSet( connection.getName(), query,
+      SerializedResultSet resultSet = DatasourceServiceHelper.getSerializeableResultSet( sanitizer.safeEscapeHtml( connection.getName() ), query,
         10, PentahoSessionHolder.getSession() );
       SQLModelGenerator sqlModelGenerator =
-        new SQLModelGenerator( name, connection.getName(), connection.getDatabaseType().getShortName(),
+        new SQLModelGenerator( name, sanitizer.safeEscapeHtml( connection.getName() ), connection.getDatabaseType().getShortName(),
           resultSet.getColumnTypes(), resultSet.getColumns(), query,
           securityEnabled, getEffectivePermittedUserList( securityEnabled ), getPermittedRoleList(), getDefaultAcls(),
           ( PentahoSessionHolder
             .getSession() != null ) ? PentahoSessionHolder.getSession().getName() : null );
       Domain domain = sqlModelGenerator.generate();
-      domain.getPhysicalModels().get( 0 ).setId( connection.getName() );
+      domain.getPhysicalModels().get( 0 ).setId( sanitizer.safeEscapeHtml( connection.getName() ) );
 
       modelerWorkspace.setDomain( domain );
 
